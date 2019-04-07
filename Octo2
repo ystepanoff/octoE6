@@ -1,0 +1,367 @@
+/*
+	Split octonions.
+	Ordering of basis: e_i for i in (-1,W,w,0,-0,-w,-W,1).
+	F4 = { 0,1,w,W=w^2 }.
+
+	Still in development for 2E6(q).
+*/
+
+// FF<w>:=GF(121);l:=w;lq:=w^11;lq1:=w^10;lq1q:=w^110;q:=11;
+// FF<w>:=GF(49);l:=w;lq:=w^7;lq1:=w^6;lq1q:=w^42;F7:=GF(7);q:=7;
+// FF<w>:=GF(4);l:=w;lq:=w^2;lq1:=w^1;lq1q:=w^2;
+FF<w>:=GF(9);l:=w;lq:=w^3;lq1:=w^2;lq1q:=w^6;F3:=GF(3); q:=3;
+// FF<w>:=GF(81);l:=w;lq:=1;lq1:=1;lq1q:=1;
+// FF<w>:=GF(8);l:=w;lq:=w^8;lq1:=w^7;lq1q:=w^56;
+// FF:=Rationals();w:=2;l:=1;lq:=1;lq1:=1;lq1q:=1;
+// FF:=GF(11);w:=PrimitiveElement(FF);l:=w;lq:=w^11;lq1:=w^10;lq1q:=w^110;
+// FF<w>:=GF(25);l:=w;lq:=w^5;lq1:=w^4;lq1q:=w^20;F5:=GF(5);q:=5;
+
+
+F<A1,A2,A3,A4,A5,A6,A7,A8,B1,B2,B3,B4,B5,B6,B7,B8,C1,C2,C3,C4,C5,C6,C7,C8,
+x1,x2,x3,x4,x5,x6,x7,x8,y1,y2,y3,y4,y5,y6,y7,y8,z1,z2,z3,z4,z5,z6,z7,z8,
+u1,u2,u3,u4,u5,u6,u7,u8,a,b,c,la,la1,la2,la3,al,be,ga,de>
+:=FunctionField(FF,68);
+
+function SplitOctonions(F);
+   se:=[<1,5,1,1>,<1,6,2,1>,<1,7,3,-1>,<1,8,4,-1>,<2,3,1,-1>,<2,4,2,1>,<2,7,5,-1>,<2,8,6,1>,
+   <3,2,1,1>,<3,4,3,1>,<3,6,5,-1>,<3,8,7,-1>,<4,1,1,1>,<4,4,4,1>,<4,6,6,1>,<4,7,7,1>,
+   <5,2,2,1>,<5,3,3,1>,<5,5,5,1>,<5,8,8,1>,<6,1,2,-1>,<6,3,4,-1>,<6,5,6,1>,<6,7,8,1>,
+   <7,1,3,1>,<7,2,4,-1>,<7,5,7,1>,<7,6,8,-1>,<8,1,5,-1>,<8,2,6,-1>,<8,3,7,1>,<8,4,8,1>];
+   return Algebra<F,8|se>;
+end function;
+
+// OO<e1,e2,e3,e4,e5,e6,e7,e8>:=SplitOctonions(F); // Doesn't work.
+OO:=SplitOctonions(F);
+e1:=OO.1;e2:=OO.2;e3:=OO.3;e4:=OO.4;e5:=OO.5;e6:=OO.6;e7:=OO.7;e8:=OO.8;
+OctoConj:=func<oo|OO![-s[1],-s[2],-s[3],s[5],s[4],-s[6],-s[7],-s[8]] where s:=Eltseq(OO!oo)>;
+OctoSigma:=func<oo|OO![s[1]^q,s[2]^q,s[3]^q,s[4]^q,s[5]^q,s[6]^q,s[7]^q,s[8]^q] where s:=Eltseq(OO!oo)>;
+OC:=OctoConj; OS:=OctoSigma;
+
+IsRe:=func<oo|&and[u eq 0:u in [s[1],s[2],s[3],s[4]-s[5],s[6],s[7],s[8]]] where s:=Eltseq(OO!oo)>;
+IsIm:=func<oo|s[4]+s[5] eq 0 where s:=Eltseq(oo)>;
+// IsRe:=func<oo|oo eq oo@OC>; // NOT in characteristic 2.
+
+A:=OO![A1,A2,A3,A4,A5,A6,A7,A8];
+B:=OO![B1,B2,B3,B4,B5,B6,B7,B8];
+C:=OO![C1,C2,C3,C4,C5,C6,C7,C8];
+u:=OO![u1,u2,u3,u4,u5,u6,u7,u8];
+x:=OO![x1,x2,x3,x4,x5,x6,x7,x8];
+y:=OO![y1,y2,y3,y4,y5,y6,y7,y8];
+z:=OO![z1,z2,z3,z4,z5,z6,z7,z8];
+AA:=A@OC;BB:=B@OC;CC:=C@OC;uu:=u@OC;xx:=x@OC;yy:=y@OC;zz:=z@OC;
+
+// x*y*z means (x*y)*z.
+
+Nm:=func<x|Eltseq(x*x@OC)[4]>;
+Tc:=func<x|Eltseq(x+x@OC)[4]>;
+
+// Elements of G_2(F).
+// Element orders for Aut1,Aut2,Aut2 are 2,3,4, becoming 2,3,2 modulo diagonal matrices.
+// Aut1 commutes with <Aut2,Aut3> = S4 (Aut2*Aut3 has order 2).
+// D12 for <Aut1,Aut2,Aut3>, S3 for <Aut2,Aut3>.
+// <Aut1,Aut2,Aut3c> = D12, <Aut2,Aut3c> = S3 both absolutely and modulo diagonal matrices.
+Aut1:=MatrixAlgebra(F,8)![
+0,0,0,0,0,0,0,1,
+0,0,0,0,0,0,1,0,
+0,0,0,0,0,1,0,0,
+0,0,0,0,1,0,0,0,
+0,0,0,1,0,0,0,0,
+0,0,1,0,0,0,0,0,
+0,1,0,0,0,0,0,0,
+1,0,0,0,0,0,0,0];
+
+Aut2:=MatrixAlgebra(F,8)![
+0,0,0,0,0,1,0,0,
+0,0,0,0,0,0,0,1,
+0,1,0,0,0,0,0,0,
+0,0,0,1,0,0,0,0,
+0,0,0,0,1,0,0,0,
+0,0,0,0,0,0,1,0,
+1,0,0,0,0,0,0,0,
+0,0,1,0,0,0,0,0];
+
+Aut3:=MatrixAlgebra(F,8)![
+1,0,0,0,0,0,0,0,
+0,0,-1,0,0,0,0,0,
+0,1,0,0,0,0,0,0,
+0,0,0,1,0,0,0,0,
+0,0,0,0,1,0,0,0,
+0,0,0,0,0,0,1,0,
+0,0,0,0,0,-1,0,0,
+0,0,0,0,0,0,0,1];
+// Fix e1,e4,e5,e8, (e_i for i in {-1,0,-0,1}).
+// Sends e_w to e_W to -e_w, e_-w to e_-W to -e_-w.
+
+Aut3b:=Aut2^2*Aut3*Aut2^2; // Neg e1,e8, Fix e4,e5, Permute (e2,e3)(e6,e7).
+Aut3c:=Aut2^2*Aut3*Aut2^2*Aut3^2; // Neg e1,e8, Fix e4,e5, swap e2 with -e3, e6 with -e7.
+
+// General diagonal element.
+Aut4:=MatrixAlgebra(F,8)![
+a*b,0,0,0,0,0,0,0,
+0,b,0,0,0,0,0,0,
+0,0,a,0,0,0,0,0,
+0,0,0,1,0,0,0,0,
+0,0,0,0,1,0,0,0,
+0,0,0,0,0,1/a,0,0,
+0,0,0,0,0,0,1/b,0,
+0,0,0,0,0,0,0,1/(a*b)];
+
+Aut5:=MatrixAlgebra(F,8)![
+1,0,0,0,0,0,0,0,
+A1,1,0,0,0,0,0,0,
+A2,A3,1,0,0,0,0,0,
+A4,A5,A6,1,0,0,0,0,
+B1,B2,B3,B4,1,0,0,0,
+B5,B6,B7,B8,C8,1,0,0,
+A7,A8,al,be,ga,de,1,0,
+C1,C2,C3,C4,C5,C6,C7,1];
+
+SE:=[(OO.i*Aut5)*(OO.j*Aut5)-(OO.i*OO.j)*Aut5:j in [1..8],i in [1..8]];
+SEE:=&cat[Eltseq(u):u in SE];
+
+Aut5:=MatrixAlgebra(F,8)![
+1,0,0,0,0,0,0,0,
+A1,1,0,0,0,0,0,0,
+A2,A3,1,0,0,0,0,0,
+A4,A5,-A1,1,0,0,0,0,
+-A4,-A5,A1,0,1,0,0,0,
+B5,B6,B7,-A1,A1,1,0,0,
+A7,A8,al,A2,-A2,-A3,1,0,
+C1,C2,C3,A4,-A4,-A5,-A1,1];
+SE:=[(OO.i*Aut5)*(OO.j*Aut5)-(OO.i*OO.j)*Aut5:j in [1..8],i in [1..8]];
+SEE:=&cat[Eltseq(u):u in SE];
+// Sort(Setseq(Set(SEE)));
+// To end of linear relations.
+
+// General unipotent element.
+// Free variables A1,A2,A3,A4,B5,A7.
+Aut5:=MatrixAlgebra(F,8)![
+1,0,0,0,0,0,0,0,
+A1,1,0,0,0,0,0,0,
+A2,A3,1,0,0,0,0,0,
+A4,-A1*A3+A2,-A1,1,0,0,0,0,
+-A4,A1*A3-A2,A1,0,1,0,0,0,
+B5,A1^2*A3-A1*A2+A4,A1^2,-A1,A1,1,0,0,
+A7,-A1*A2*A3+A2^2-A3*A4,-A1*A2-A4,A2,-A2,-A3,1,0,
+-A1*A7-A2*B5+A4^2,-A1*A3*A4+A2*A4-A3*B5-A7,-A1*A4-B5,A4,-A4,A1*A3-A2,-A1,1];
+SE:=[(OO.i*Aut5)*(OO.j*Aut5)-(OO.i*OO.j)*Aut5:j in [1..8],i in [1..8]];
+SEE:=&cat[Eltseq(u):u in SE];
+// Sort(Setseq(Set(SEE)));
+
+AP := function(vec1, vec2);
+	return Tc(vec1[4] * (vec2[4]@OC)) + Tc(vec1[5] * (vec2[5]@OC)) + Tc(vec1[6] * (vec2[6]@OC))
+			- (vec1[1]*vec2[2] + vec1[2]*vec2[1]) - (vec1[1]*vec2[3] + vec1[3]*vec2[1]) - (vec1[2]*vec2[3] + vec1[3]*vec2[2]);
+end function;
+
+Acton:=function(vec,mat); // vec, matrix.
+   v:=vec; m:=[[mat[1],mat[2],mat[3]],[mat[4],mat[5],mat[6]],[mat[7],mat[8],mat[9]]];
+   if &or [not IsRe(u):u in [v[1],v[2],v[3]]] then
+      return false;
+   else
+      vv := [[v[1],v[6],v[5]@OC],[v[6]@OC,v[2],v[4]],[v[5],v[4]@OC,v[3]]];
+      m2 := [[&+[vv[i,k]*m[k,j]:k in [1..3]]:j in [1..3]]:i in [1..3]];
+      m1 := [[m[j,i]@OC:j in [1..3]]:i in [1..3]];
+      mm := [[&+[m1[i,k]*m2[k,j]:k in [1..3]]:j in [1..3]]:i in [1..3]];
+      if &or [not IsRe(u):u in [mm[1,1],mm[2,2],mm[3,3]]] then
+         return "Crap 1";
+      elif &or [mm[2,1] ne mm[1,2]@OC,mm[3,2] ne mm[2,3]@OC,mm[1,3] ne mm[3,1]@OC] then
+         return "Crap 2";
+      else
+         return [mm[1,1],mm[2,2],mm[3,3],mm[2,3],mm[3,1],mm[1,2]];
+      end if;
+   end if;
+end function;
+
+Det:=function(vec); // vec, matrix.
+   v:=vec;v1:=v[1];v2:=v[2];v3:=v[3];v4:=v[4];v5:=v[5];v6:=v[6];
+   if &or [not IsRe(u):u in [v[1],v[2],v[3]]] then
+      return false;
+   else
+      return (v1*v2*v3-v1*Nm(v4)-v2*Nm(v5)-v3*Nm(v6)+Tc(v4*v5*v6))[4];
+   end if;
+end function;
+
+Actonn:=function(vec,mat); // vec, matrix.
+   v:=vec; m:=[[mat[1],mat[2],mat[3]],[mat[4],mat[5],mat[6]],[mat[7],mat[8],mat[9]]];
+   if &or [not IsRe(u):u in [v[1],v[2],v[3]]] then
+      return false;
+   else
+      vv := [[v[1],v[6],v[5]@OC],[v[6]@OC,v[2],v[4]],[v[5],v[4]@OC,v[3]]];
+      m2 := [[&+[vv[i,k]*m[k,j]:k in [1..3]]:j in [1..3]]:i in [1..3]];
+      m1 := [[m[j,i]@OC:j in [1..3]]:i in [1..3]];
+      mm := [[&+[m1[i,k]*m2[k,j]:k in [1..3]]:j in [1..3]]:i in [1..3]];
+      return &cat mm;
+   end if;
+end function;
+
+Acton([a,b,c,A,B,C],[la1*u,0,0,0,la2*uu,0,0,0,la3]) eq [la1^2*Nm(u)*a,la2^2*Nm(u)*b,la3^2*c,la2*la3*u*A,la1*la3*B*u,la1*la2*uu*C*uu];
+
+Det([la1^2*Nm(u)*a,la2^2*Nm(u)*b,la3^2*c,la2*la3*u*A,la1*la3*B*u,la1*la2*uu*C*uu])
+eq la1^2*la2^2*la3^2*Nm(u)^2*Det([a,b,c,A,B,C]);
+
+Acton([a,b,c,A,B,C],[1,x,0,0,1,0,0,0,1]) eq [a,b+a*Nm(x)+Tc(xx*C),c,A+xx*BB,B,C+a*x];
+Acton([a,b,c,A,B,C],[1,0,0,0,1,x,0,0,1]) eq [a,b,c+b*Nm(x)+Tc(xx*A),A+b*x,B+xx*CC,C];
+Acton([a,b,c,A,B,C],[1,0,0,0,1,0,x,0,1]) eq [a+c*Nm(x)+Tc(xx*B),b,c,A,B+c*x,C+xx*AA];
+Acton([a,b,c,A,B,C],[1,0,0,x,1,0,0,0,1]) eq [a+b*Nm(x)+Tc(C*x),b,c,A,B+AA*x,C+b*xx];
+Acton([a,b,c,A,B,C],[1,0,0,0,1,0,0,x,1]) eq [a,b+c*Nm(x)+Tc(A*x),c,A+c*xx,B,C+BB*x];
+Acton([a,b,c,A,B,C],[1,0,x,0,1,0,0,0,1]) eq [a,b,c+a*Nm(x)+Tc(B*x),A+CC*x,B+a*xx,C];
+
+Acton([a,b,c,A,B,C],[1,0,0,x,1,0,0,0,1]) eq [a+Nm(x)*b+Tc(x*C),b,c,A,B+AA*x,C+b*xx];
+Acton([a,b,c,A,B,C],[1,0,0,0,1,0,y,0,1]) eq [a+Tc(B*yy)+Nm(y)*c,b,c,A,B+c*y,C+yy*AA];
+Acton([a,b,c,A,B,C],[1,0,0,0,al,be,0,ga,de]) eq [a,Tc(A)*al*ga+b*al^2+c*ga^2,
+Tc(A)*be*de+b*be^2+c*de^2,A*(al*de-be*ga)+Tc(A)*be*ga+b*al*be+c*ga*de,B*de+CC*be,C*al+BB*ga];
+Acton([a,b,c,A,B,C],[al,be,0,ga,de,0,0,0,1]) eq [Tc(C)*al*ga+a*al^2+b*ga^2,
+Tc(C)*be*de+a*be^2+b*de^2,c,A*de+BB*be,B*al+AA*ga,C*(al*de-be*ga)+Tc(C)*be*ga+a*al*be+b*ga*de];
+
+Det(Acton([a,b,c,A,B,C],[1,0,0,x,1,0,0,0,1])) eq Det([a,b,c,A,B,C]);
+Det(Acton([a,b,c,A,B,C],[1,0,0,0,1,0,y,0,1])) eq Det([a,b,c,A,B,C]);
+Det(Acton([a,b,c,A,B,C],[1,0,0,0,al,be,0,ga,de])) eq (al*de-be*ga)^2*Det([a,b,c,A,B,C]);
+
+Acton([a,b,c,A,B,C],[0,1,0,0,0,1,1,0,0]) eq [c,a,b,C,A,B];
+Acton([a,b,c,A,B,C],[1,0,0,0,0,1,0,1,0]) eq [a,c,b,AA,CC,BB];
+Acton([a,b,c,A,B,C],[0,1,0,1,0,0,0,0,1]) eq [b,a,c,BB,AA,CC];
+
+VV:=VectorSpace(FF,27);
+V:=VectorSpace(F,27);
+function CvtToVec(seq);
+   return V!([seq[i][4]:i in [1..3]] cat &cat[Eltseq(u):u in [seq[i]:i in [4..6]]]);
+end function;
+function CvtToVecSeq(seq);
+   return [seq[i][4]:i in [1..3]] cat &cat[Eltseq(u):u in [seq[i]:i in [4..6]]];
+end function;
+
+BAS:=[[OO!1,0,0,0,0,0],[0,OO!1,0,0,0,0],[0,0,OO!1,0,0,0]]
+cat [[0,0,0,OO.i,0,0]:i in [1..8]]
+cat [[0,0,0,0,OO.i,0]:i in [1..8]]
+cat [[0,0,0,0,0,OO.i]:i in [1..8]];
+
+MA27:=MatrixAlgebra(F,27);
+
+function Make27DimMtx(mm);
+	for u in BAS do
+		if Type(Acton(u, mm)) eq MonStgElt then
+			return "Crap";
+		end if;
+	end for;
+   return MA27!&cat[CvtToVecSeq(Acton(u,mm)):u in BAS];
+end function;
+
+ma1:=Make27DimMtx([1,e1,0,e1,1,0,0,0,1]); // Not this one.
+ma2:=Make27DimMtx([1,e2,0,e2,1,0,0,0,1]);
+ma3:=Make27DimMtx([1,e3,0,e3,1,0,0,0,1]);
+ma4:=Make27DimMtx([1,e4,0,-e5,1,0,0,0,1]);
+ma5:=Make27DimMtx([1,e5,0,-e4,1,0,0,0,1]);
+ma6:=Make27DimMtx([1,e6,0,e6,1,0,0,0,1]);
+ma7:=Make27DimMtx([1,e7,0,e7,1,0,0,0,1]);
+ma8:=Make27DimMtx([1,e8,0,e8,1,0,0,0,1]);
+
+np4:=Make27DimMtx([1,0,-e5,0,1,0,e4,0,1]);
+np6:=Make27DimMtx([1,0,e6,0,1,0,e6,0,1]);
+np7:=Make27DimMtx([1,0,e7,0,1,0,e7,0,1]);
+np8:=Make27DimMtx([1,0,e8,0,1,0,e8,0,1]);
+npp5:=Make27DimMtx([1,0,0,0,1,e5,0,-e4,1]);
+npp6:=Make27DimMtx([1,0,0,0,1,e6,0,e6,1]);
+npp7:=Make27DimMtx([1,0,0,0,1,e7,0,e7,1]);
+npp8:=Make27DimMtx([1,0,0,0,1,e8,0,e8,1]);
+
+ss:=[np4,np6,np7,np8,npp5,npp6,npp7,npp8];
+ss2:=[ma1,ma2,ma3,ma4,ma5,ma6,ma7,ma8];
+
+// Some monomial matrices.
+mo1:=Make27DimMtx([0,1,0,0,0,1,1,0,0]);
+mo2:=Make27DimMtx([1,0,0,0,0,1,0,1,0]);
+pe1:=mo1;pe2:=mo2;
+mo3:=Make27DimMtx([-1,0,0,0,-1,0,0,0,1]);
+mo4:=Make27DimMtx([-1,0,0,0,-1,0,0,0,-1]); // Identity.
+mb1:=Make27DimMtx([e1+e8,0,0,0,-e1-e8,0,0,0,1]);
+mb2:=Make27DimMtx([e2+e7,0,0,0,-e2-e7,0,0,0,1]);
+mb3:=Make27DimMtx([e3+e6,0,0,0,-e3-e6,0,0,0,1]);
+mb1p:=Make27DimMtx([1,0,0,0,e1+e8,0,0,0,-e1-e8]); // Nothing extra, with coord perms.
+mb2p:=Make27DimMtx([1,0,0,0,e2+e7,0,0,0,-e2-e7]); // Nothing extra, with coord perms.
+mb3p:=Make27DimMtx([1,0,0,0,e3+e6,0,0,0,-e3-e6]); // Nothing extra, with coord perms.
+mb1w:=Make27DimMtx([w*e1+w^-1*e8,0,0,0,-w*e1-w^-1*e8,0,0,0,1]);
+mb2w:=Make27DimMtx([w*e2+w^-1*e7,0,0,0,-w*e2-w^-1*e7,0,0,0,1]);
+mb3w:=Make27DimMtx([w*e3+w^-1*e6,0,0,0,-w*e3-w^-1*e6,0,0,0,1]);
+mb4w:=Make27DimMtx([w*e4+w^-1*e5,0,0,0,w*e5+w^-1*e4,0,0,0,1]);
+mb3b:=Make27DimMtx([e3+e6+e4,0,0,0,-e3-e6+e5,0,0,0,1]); // Not this one.
+mb4a:=Make27DimMtx([e4-e5,0,0,0,e4-e5,0,0,0,1]);
+
+md1:=Make27DimMtx([0,1,0,-1,0,0,0,0,1]);
+mc:=Make27DimMtx([lq1,0,0,0,lq1^-1,0,0,0,1]);
+
+mm1:=Make27DimMtx([1,e8,0,0,1,0,0,0,1]);
+mm2:=Make27DimMtx([1,0,0,e1,1,0,0,0,1]);
+mm:=mm1*mm2*mm1; // This one, not the two above.
+
+h1a:=Make27DimMtx([1+e7,0,0,0,1-e7,0,0,0,1]);
+h1b:=Make27DimMtx([1+e6,0,0,0,1-e6,0,0,0,1]);
+h1c:=Make27DimMtx([1+e3,0,0,0,1-e3,0,0,0,1]);
+h1d:=Make27DimMtx([1+e2,0,0,0,1-e2,0,0,0,1]);
+h1e:=Make27DimMtx([1+e6+e7,0,0,0,1-e6-e7,0,0,0,1]);
+h1f:=Make27DimMtx([1+e2+e3,0,0,0,1-e2-e3,0,0,0,1]);
+h1g:=Make27DimMtx([1+e2+e6,0,0,0,1-e2-e6,0,0,0,1]);
+h1h:=Make27DimMtx([1+e2+e3+e6-e7,0,0,0,1-e2-e3-e6+e7,0,0,0,1]);
+h1i:=Make27DimMtx([e2+e3+e7,0,0,0,-e2-e3-e7,0,0,0,1]);
+h1j:=Make27DimMtx([e4+e2+e7,0,0,0,e5-e2-e7,0,0,0,1]);
+h2a:=Make27DimMtx([1+e8,0,0,0,1-e8,0,0,0,1]);
+h2b:=Make27DimMtx([1+e7+e8,0,0,0,1-e7-e8,0,0,0,1]);
+h2c:=Make27DimMtx([1+e6+e8,0,0,0,1-e6-e8,0,0,0,1]);
+
+qq1o:=Make27DimMtx([l,0,0,0,lq,0,0,0,1]); // Not right.
+qq2o:=mo2*mo1; // Not right either.
+qq1:=Make27DimMtx([lq1,0,0,0,lq1q,0,0,0,1]);
+qq2:=Make27DimMtx([0,1,0,-1,0,0,0,0,1]);
+ma7p:=Make27DimMtx([1,l*e7,0,lq*e7,1,0,0,0,1]);
+
+H6:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j>; // Spin6+
+H8m0:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,qq1,qq2>; // Not Spin8-.
+// "Affinising" H8m0 (with h2a) does not give a group as big as we wish either.
+H8m1:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,qq1,qq2>;
+// Maybe not Spin8- (is only q=3 a problem?: odd nature of qq1 here).
+H8m:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2>; // Is Spin8-.
+H10m:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,ma8,ma1>; // Is Spin10-.
+H8mq24:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,np4>; // Is q^{8+16}:Spin8-.
+GG:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,np4,ma1>;
+
+/*
+ms:=[];
+for t in FF do if t ne 0 then
+Append(~ms,Make27DimMtx([t*e1+t^-1*e8,0,0,0,-t*e1-t^-1*e8,0,0,0,1]));
+Append(~ms,Make27DimMtx([t*e2+t^-1*e7,0,0,0,-t*e2-t^-1*e7,0,0,0,1]));
+Append(~ms,Make27DimMtx([t*e3+t^-1*e6,0,0,0,-t*e3-t^-1*e6,0,0,0,1]));
+Append(~ms,Make27DimMtx([t*e4+t^-1*e5,0,0,0,t*e5+t^-1*e4,0,0,0,1]));
+Append(~ms,Make27DimMtx([1,0,0,0,t*e1+t^-1*e8,0,0,0,-t*e1-t^-1*e8]));
+Append(~ms,Make27DimMtx([1,0,0,0,t*e2+t^-1*e7,0,0,0,-t*e2-t^-1*e7]));
+Append(~ms,Make27DimMtx([1,0,0,0,t*e3+t^-1*e6,0,0,0,-t*e3-t^-1*e6]));
+Append(~ms,Make27DimMtx([1,0,0,0,t*e4+t^-1*e5,0,0,0,t*e5+t^-1*e4]));
+end if;end for;
+*/
+
+np4p:=Make27DimMtx([1,0,-e5*lq,0,1,0,e4*l,0,1]);
+np6p:=Make27DimMtx([1,0,e6*lq,0,1,0,e6*l,0,1]);
+np7p:=Make27DimMtx([1,0,e7*lq,0,1,0,e7*l,0,1]);
+np8p:=Make27DimMtx([1,0,e8*lq,0,1,0,e8*l,0,1]);
+npp5p:=Make27DimMtx([1,0,0,0,1,e5*l,0,-e4*lq,1]);
+npp6p:=Make27DimMtx([1,0,0,0,1,e6*l,0,e6*lq,1]);
+npp7p:=Make27DimMtx([1,0,0,0,1,e7*l,0,e7*lq,1]);
+npp8p:=Make27DimMtx([1,0,0,0,1,e8*l,0,e8*lq,1]);
+
+ssp:=[np4p,np6p,np7p,np8p,npp5p,npp6p,npp7p,npp8p];
+
+M1 := Make27DimMtx([1,0,0,0,1,e4,0,-e5,1]);
+M2 := Make27DimMtx([1,0,0,0,1,w*e2,0,w^3*e2,1]);
+M3 := Make27DimMtx([1,0,0,0,1,w*e5,0,-w^3*e4,1]);
+
+X := [ x : x in [e1,e2,e3,e4,e5,e6,e7,e8] | x * (x@OC) eq 0 and (x@OC) * x eq 0 ];
+NX := [ [1,x,0, -x@OC,1,0, 0,0,1] : x in X ] cat [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1]: x in [e8] ];
+NX1 := [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1] : x in [e1,e2,e3,e4,e5,e6,e7,e8] ];
+GSpin10m := MatrixGroup<27,FF|[Make27DimMtx(u) : u in NX]>;
+
+M := func< x | [1,x,0, 0,1,0, 0,0,1] >;
+Mp := func< x | [1,0,0, 0,1,x, 0,0,1] >;
+Mpp := func< x | [1,0,0, 0,1,0, x,0,1] >;
+L := func< x | [1,0,0, x,1,0, 0,0,1] >;
+Lp := func< x | [1,0,0, 0,1,0, 0,x,1] >;
+Lpp := func< x | [1,0,x, 0,1,0, 0,0,1] >; 
+
+#GSpin10m eq 2*#OmegaMinus(10,q);
