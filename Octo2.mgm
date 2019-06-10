@@ -1,9 +1,9 @@
 /*
-	Split octonions.
-	Ordering of basis: e_i for i in (-1,W,w,0,-0,-w,-W,1).
-	F4 = { 0,1,w,W=w^2 }.
+Split octonions.
+Ordering of basis: e_i for i in (-1,W,w,0,-0,-w,-W,1).
+F4 = {0,1,w,W=w^2}.
 
-	Still in development for 2E6(q).
+Still in development for 2E6(q).
 */
 
 // FF<w>:=GF(121);l:=w;lq:=w^11;lq1:=w^10;lq1q:=w^110;q:=11;
@@ -194,10 +194,12 @@ Actonn:=function(vec,mat); // vec, matrix.
    end if;
 end function;
 
+
 Acton([a,b,c,A,B,C],[la1*u,0,0,0,la2*uu,0,0,0,la3]) eq [la1^2*Nm(u)*a,la2^2*Nm(u)*b,la3^2*c,la2*la3*u*A,la1*la3*B*u,la1*la2*uu*C*uu];
 
 Det([la1^2*Nm(u)*a,la2^2*Nm(u)*b,la3^2*c,la2*la3*u*A,la1*la3*B*u,la1*la2*uu*C*uu])
 eq la1^2*la2^2*la3^2*Nm(u)^2*Det([a,b,c,A,B,C]);
+
 
 Acton([a,b,c,A,B,C],[1,x,0,0,1,0,0,0,1]) eq [a,b+a*Nm(x)+Tc(xx*C),c,A+xx*BB,B,C+a*x];
 Acton([a,b,c,A,B,C],[1,0,0,0,1,x,0,0,1]) eq [a,b,c+b*Nm(x)+Tc(xx*A),A+b*x,B+xx*CC,C];
@@ -221,10 +223,11 @@ Acton([a,b,c,A,B,C],[0,1,0,0,0,1,1,0,0]) eq [c,a,b,C,A,B];
 Acton([a,b,c,A,B,C],[1,0,0,0,0,1,0,1,0]) eq [a,c,b,AA,CC,BB];
 Acton([a,b,c,A,B,C],[0,1,0,1,0,0,0,0,1]) eq [b,a,c,BB,AA,CC];
 
+
 VV:=VectorSpace(FF,27);
 V:=VectorSpace(F,27);
 function CvtToVec(seq);
-   return V!([seq[i][4]:i in [1..3]] cat &cat[Eltseq(u):u in [seq[i]:i in [4..6]]]);
+   return VV!([seq[i][4]:i in [1..3]] cat &cat[Eltseq(u):u in [seq[i]:i in [4..6]]]);
 end function;
 function CvtToVecSeq(seq);
    return [seq[i][4]:i in [1..3]] cat &cat[Eltseq(u):u in [seq[i]:i in [4..6]]];
@@ -266,6 +269,8 @@ npp8:=Make27DimMtx([1,0,0,0,1,e8,0,e8,1]);
 
 ss:=[np4,np6,np7,np8,npp5,npp6,npp7,npp8];
 ss2:=[ma1,ma2,ma3,ma4,ma5,ma6,ma7,ma8];
+
+
 
 // Some monomial matrices.
 mo1:=Make27DimMtx([0,1,0,0,0,1,1,0,0]);
@@ -320,7 +325,9 @@ H8m1:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,qq1,qq2>;
 // Maybe not Spin8- (is only q=3 a problem?: odd nature of qq1 here).
 H8m:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2>; // Is Spin8-.
 H10m:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,ma8,ma1>; // Is Spin10-.
+
 H8mq24:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,np4>; // Is q^{8+16}:Spin8-.
+
 GG:=MatrixGroup<27,FF|h1a,h1b,h1c,h1d,h1e,h1j,ma7,ma7p,qq1,qq2,np4,ma1>;
 
 /*
@@ -352,10 +359,100 @@ M1 := Make27DimMtx([1,0,0,0,1,e4,0,-e5,1]);
 M2 := Make27DimMtx([1,0,0,0,1,w*e2,0,w^3*e2,1]);
 M3 := Make27DimMtx([1,0,0,0,1,w*e5,0,-w^3*e4,1]);
 
+// Some groups
+//ii := [F3|0,1,2];
+//se3 := [OO![0,i2,0,i4,i5,i6,i7,i8]:i8 in ii,i7 in ii,i6 in ii,i5 in ii,i4 in ii, i2 in ii];
+//se3o := se3;
+//se3 := [u:u in se3|Nm(u) eq 1];
+
+//ggO8 := [Make27DimMtx([u,0,0,0,u@OC,0,0,0,1]):u in se3];
+//g8 := MatrixGroup<27,FF|[Random(ggO8):i in [1..8]]>;
+//se3b := [<s,t>:t in FF,s in FF|s^4+t^4 eq 1];
+//gg3b := [Make27DimMtx([u[1],u[2],0,-u[2]^3,u[1]^3,0,0,0,1]):u in se3b];
+//g9 := MatrixGroup<27,FF|g8,[Random(gg3b):i in [1..5]]>; // 3^13.SU(4,3);
+//g10 := MatrixGroup<27,FF|g9,M1*M3>; // SU(6,3)-ish
+
+//M := M1 * M3;
+
+//dCO := [];
+//vec := CvtToVec( [0,0,0,0,0,e8+l*e6] );
+
+//while Index(dCO, 5) eq 0 do
+//    w1 := Matrix(Random(g9));
+//    w2 := Matrix(Random(g9));
+//    oM := Order(M);
+//    a1 := Random(oM); a2 := Random(oM); a3 := Random(oM);
+//    h := M^a1 * w1 * M^a2 * w2 * M^a3;
+
+//    if vec * h eq vec then
+//        g10p := MatrixGroup<27,FF|g9,h>;
+//        CO := Constituents( GModule( g10p ) );
+//       dCO := [Dimension(u) : u in CO];
+//    end if;
+//end while;
+
+//GQ24 := MatrixGroup<27,FF|np4,np6,np7,np8,npp5,npp6,npp7,npp8,np4p,np8p,np7p,np6p,npp5p,npp6p,npp7p,npp8p>;
+//FactoredOrder( GQ24 );
+
+//v1 := [0,0,0,0,0,e8+l*e6];
+//seU := [OO![i1,i2,i3,i4,i5,i6,i7,i8]:i8 in ii,i7 in ii,i6 in ii,i5 in ii,i4 in ii,i3 in ii,i2 in ii,i1 in ii];
+//seU := [u:u in seU|Nm(u) eq 1];
+//PU := [[u,0,0,0,u@OC,0,0,0,1] : u in seU];
+//GPU := [Make27DimMtx(u)  : u in PU | Acton(w,u) eq w];
+//GU := MatrixGroup<27,FF|[Random(GPU):i in [1..8]],[Random(gg3b):i in [1..5]]>;
+
 X := [ x : x in [e1,e2,e3,e4,e5,e6,e7,e8] | x * (x@OC) eq 0 and (x@OC) * x eq 0 ];
-NX := [ [1,x,0, -x@OC,1,0, 0,0,1] : x in X ] cat [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1]: x in [e8] ];
+Nx := [ [1,x,0, -x@OC,1,0, 0,0,1] : x in X ] cat
+      [ [1,w*x,0, -w^q*x@OC,1,0, 0,0,1]: x in X] cat
+      [ [1,0,-x@OC, 0,1,0, x,0,1] : x in X] cat
+      [ [1,0,-w^q*x@OC, 0,1,0, w*x,0,1] : x in X] cat
+      [ [1,0,0, 0,1,x, 0,-x@OC,1] : x in X] cat
+      [ [1,0,0, 0,1,w*x, 0,-w^q*x@OC,1] : x in X];
+
+Nxp := [ [1,0,-x@OC, 0,1,0, x,0,1] : x in X] cat
+       [ [1,0,-w^q*x@OC, 0,1,0, w*x,0,1] : x in X] cat
+       [ [1,0,0, 0,1,x, 0,-x@OC,1] : x in X] cat
+       [ [1,0,0, 0,1,w*x, 0,-w^q*x@OC,1] : x in X];
+
+v2 := [0,0,0,0,0,e8+l*e6];
+v3 := [0,0,1,0,0,0];
+LQ21 := [ M : M in Nx | Acton(v2,M) eq v2 ];
+LQ21p := [ M : M in Nx | Acton(v2,M) eq v2 and Acton(v3,M) ne v3 ];
+LQ21pp := [ M : M in Nx | Acton(v2,M) eq v2 and Acton(v3,M) eq v3 ];
+
+
+//hh := [Random( g9 ) : i in [1..3]];
+//while Order( MatrixGroup<27,FF|[Make27DimMtx(u):u in LQ21],hh> ) eq 3^21*Order( SU(4,3) ) do
+//    hh := [Random( g9 ) : i in [1..3]];
+//end while;
+
+gSpin10p := [ Make27DimMtx([1,x,0, 0,1,0, 0,0,1]) : x in [e1,e2,e3,e4,e5,e6,e7,e8] ] cat
+            [ Make27DimMtx([1,0,0, y,1,0, 0,0,1]) : y in [e1,e2,e3,e4,e5,e6,e7,e8] ];
+            //[ Make27DimMtx([1,l*e1,0, 0,1,0, 0,0,1]) ];
+
+NX := [ [1,x,0, -x@OC,1,0, 0,0,1] : x in X ] cat [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1] : x in X ];
+NXp := [ [1,0,-x@OC, 0,1,0, x,0,1] : x in X] cat [ [1,0,-w^q*(x@OC), 0,1,0, w*x,0,1] : x in X ];
+NXpp := [ [1,0,0, 0,1,x, 0,-x@OC,1] : x in X] cat [ [1,0,0, 0,1,w*x, 0,-w^q*(x@OC),1] : x in X ];
 NX1 := [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1] : x in [e1,e2,e3,e4,e5,e6,e7,e8] ];
 GSpin10m := MatrixGroup<27,FF|[Make27DimMtx(u) : u in NX]>;
+
+//n := #NX;
+//for mask in [1 .. 2^n-1] do
+//	curr := [];
+//	for i in [0..n-1] do
+//		if BitwiseAnd(mask, 2^i) ne 0 then
+//			curr := curr cat [ Make27DimMtx(NX[i+1]) ];
+//		end if;
+//	end for;
+//	G := MatrixGroup<27,FF | curr >;
+//	CO := Constituents( GModule( G ) );
+//	D := [Dimension(u) : u in CO];
+//	if (Index(D, 4) ne 0) and (#G eq #SU(4,3)*q^13) then
+//		print mask;
+//	end if;
+//end for;
+
+print "done\n";
 
 M := func< x | [1,x,0, 0,1,0, 0,0,1] >;
 Mp := func< x | [1,0,0, 0,1,x, 0,0,1] >;
@@ -364,4 +461,36 @@ L := func< x | [1,0,0, x,1,0, 0,0,1] >;
 Lp := func< x | [1,0,0, 0,1,0, 0,x,1] >;
 Lpp := func< x | [1,0,x, 0,1,0, 0,0,1] >; 
 
-#GSpin10m eq 2*#OmegaMinus(10,q);
+W1 := [0,0,0, 0,0,e4];
+W2 := [0,0,0, 0,0,e4+w^q*e8];
+W3 := [0,0,1, 0,0,0];
+S1 := [ u : u in NX | Acton(W1,u) eq W1 and Acton(W3,u) ne W3 ];
+S2 := [ u : u in NXp | Acton(W1,u) eq W1 and Acton(W3,u) ne W3 ];
+S3 := [ u : u in NXpp | Acton(W1,u) eq W1 and Acton(W3,u) ne W3 ];
+
+NX := [ [1,x,0, -x@OC,1,0, 0,0,1] : x in X ] cat [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1] : x in X ];
+NXp := [ [1,0,-x@OC, 0,1,0, x,0,1] : x in X] cat [ [1,0,-w^q*(x@OC), 0,1,0, w*x,0,1] : x in X ];
+NXpp := [ [1,0,0, 0,1,x, 0,-x@OC,1] : x in X] cat [ [1,0,0, 0,1,w*x, 0,-w^q*(x@OC),1] : x in X ];
+NX1 := [ [1,w*x,0, -w^q*(x@OC),1,0, 0,0,1] : x in [e1,e2,e3,e4,e5,e6,e7,e8] ];
+
+G := MatrixGroup<27,FF |
+                [Make27DimMtx(u) : u in NX cat NXp cat NXpp |
+                 Acton(W2, u) eq W2 and Acton(W3, u) eq W3]>;
+V := RSpace(G);
+
+V10 := sub<V | [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,1,0,0,0,w,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,1,0,0,0,-w,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,-w,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,w,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,w] >;
+
+V5RadH := sub<V | [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                  [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+                  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
+                  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,w]>;
