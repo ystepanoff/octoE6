@@ -238,7 +238,7 @@ cat [[0,0,0,OO.i,0,0]:i in [1..8]]
 cat [[0,0,0,0,OO.i,0]:i in [1..8]]
 cat [[0,0,0,0,0,OO.i]:i in [1..8]];
 
-MA27:=MatrixAlgebra(F,27);
+MA27:=MatrixAlgebra(FF,27);
 
 function Make27DimMtx(mm);
 	for u in BAS do
@@ -494,3 +494,36 @@ V5RadH := sub<V | [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],
                   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,w]>;
+
+
+M1 := Make27DimMtx([1,0,0,0,1,e4,0,-e5,1]);
+M2 := Make27DimMtx([1,0,0,0,1,w*e2,0,w^3*e2,1]);
+M3 := Make27DimMtx([1,0,0,0,1,w*e5,0,-w^3*e4,1]);
+M := M1 * M3;
+
+vec := CvtToVec( [0,0,0, 0,0,e8+w*e6] );
+
+GSpin10m := MatrixGroup<27,FF | [Make27DimMtx(u) : u in NX | Acton([0,0,0, 0,0,e8+w*e6],u) eq [0,0,0, 0,0,e8+w*e6]]>;
+H := Stabiliser(GSpin10m, vec); // q^13.SU(4,q)
+#H eq q^13*#SU(4,3);
+
+print "Starting search.";
+
+dCO := [];
+o := Order(M);
+while Index(dCO,5) eq 0 do
+    w1 := Matrix(Random(GSpin10m));
+    w2 := Matrix(Random(GSpin10m));
+    a1 := Random(o);
+    a2 := Random(o);
+    a3 := Random(o);
+    h := M^a1 * w1 * M^a2 * w2 * M^a3;
+
+    if vec * h eq vec then
+        GS := MatrixGroup<27,FF | GSpin10m,h >;
+        CO := Constituents(GModule(GS));
+        dCO := [Dimension(u) : u in CO];
+    end if;
+end while;
+
+print "Done.";
