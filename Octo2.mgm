@@ -593,3 +593,18 @@ W10 := sub<V | [0,0,1,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,0],
                [0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,1,   0,0,0,0,0,0,0,0],
                [0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,0,0,0,0,   0,0,0,0,1,0,0,w] >;
 
+RestoreVec := function(vec);
+                           ac := vec[1] * (e4 + e5);
+                           bc := vec[2] * (e4 + e5);
+                           cc := vec[3] * (e4 + e5);
+                           Ac := OO![vec[4],vec[5],vec[6],vec[7],vec[8],vec[9],vec[10],vec[11]];
+                           Bc := OO![vec[12],vec[13],vec[14],vec[15],vec[16],vec[17],vec[18],vec[19]];
+                           Cc := OO![vec[20],vec[21],vec[22],vec[23],vec[24],vec[25],vec[26],vec[27]];
+                           return [ac,bc,cc, Ac,Bc,Cc];
+end function;
+
+NSG1 := NormalSubgroups(G1);
+FK10 := [u`subgroup : u in NSG1 | u`order eq q^21][1];
+
+W5 := sub<W10 | [W10.1, W10.2,W10.3,W10.6,W10.7]>;
+G5 := Stabiliser(G1, W5);
